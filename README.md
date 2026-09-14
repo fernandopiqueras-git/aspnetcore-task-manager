@@ -1,6 +1,6 @@
 # ASP.NET Core Task Manager
 
-Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
+Aplicación web para gestionar y organizar tareas.
 
 ## Tecnologías
 
@@ -13,14 +13,15 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 
 ## Funciones
 
-- Crear, consultar, editar y eliminar tareas
-- Confirmación antes de eliminar
-- Cambiar el estado de una tarea
-- Validar títulos, descripciones y fechas límite
-- Filtrar por texto, estado y prioridad
-- Persistencia en SQL Server mediante migraciones
+- CRUD completo de tareas
+- Estados, prioridades y fechas límite
+- Proyectos y etiquetas
+- Asignación de responsables
+- Comentarios en las tareas
+- Búsqueda y filtros
+- Persistencia mediante migraciones
 - Diseño responsive
-- Pruebas unitarias del repositorio, controlador y validaciones
+- Pruebas unitarias
 
 ## Ejecución
 

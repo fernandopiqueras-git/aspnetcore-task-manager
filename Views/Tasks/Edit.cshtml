@@ -1,15 +1,13 @@
 @using AspNetCoreTaskManager.Models
 @model TaskItem
-<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Editar tarea</title><link rel="stylesheet" href="~/css/site.css" /></head>
-<body><main class="form-page"><a asp-action="Index">← Volver</a><h1>Editar tarea</h1>
-<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-    <input asp-for="Id" type="hidden" />
-    <div asp-validation-summary="All" class="validation"></div>
-    <label>Título<input asp-for="Title" /></label>
-    <label>Descripción<textarea asp-for="Description"></textarea></label>
-    <label>Estado<select asp-for="Status" asp-items="Html.GetEnumSelectList<WorkStatus>()"></select></label>
-    <label>Prioridad<select asp-for="Priority" asp-items="Html.GetEnumSelectList<TaskPriority>()"></select></label>
-    <label>Fecha límite<input asp-for="DueDate" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" /></label>
-    <div class="dialog-actions"><a asp-action="Details" asp-route-id="@Model.Id">Cancelar</a><button type="submit" class="primary">Guardar</button></div>
-</form></main></body></html>
+@{ var projects = (IReadOnlyCollection<Project>)ViewBag.Projects; var tags = (IReadOnlyCollection<Tag>)ViewBag.Tags; var selectedTagIds = (int[])ViewBag.SelectedTagIds; }
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Editar tarea</title><link rel="stylesheet" href="~/css/site.css" /></head>
+<body><main class="form-page"><a asp-action="Index">← Volver</a><h1>Editar tarea</h1><form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+<input asp-for="Id" type="hidden" /><div asp-validation-summary="All" class="validation"></div>
+<label>Título<input asp-for="Title" /></label><label>Descripción<textarea asp-for="Description"></textarea></label>
+<label>Estado<select asp-for="Status" asp-items="Html.GetEnumSelectList<WorkStatus>()"></select></label><label>Prioridad<select asp-for="Priority" asp-items="Html.GetEnumSelectList<TaskPriority>()"></select></label>
+<label>Fecha límite<input asp-for="DueDate" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" /></label>
+<label>Proyecto<select asp-for="ProjectId"><option value="">Sin proyecto</option>@foreach (var project in projects) { <option value="@project.Id">@project.Name</option> }</select></label>
+<label>Responsable<input asp-for="AssignedTo" /></label>
+<fieldset><legend>Etiquetas</legend>@foreach (var tag in tags) { <label class="check"><input type="checkbox" name="tagIds" value="@tag.Id" checked="@(selectedTagIds.Contains(tag.Id) ? "checked" : null)" />@tag.Name</label> }</fieldset>
+<div class="dialog-actions"><a asp-action="Details" asp-route-id="@Model.Id">Cancelar</a><button class="primary">Guardar</button></div></form></main></body></html>

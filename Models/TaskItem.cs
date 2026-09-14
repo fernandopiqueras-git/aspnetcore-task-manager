@@ -21,4 +21,12 @@ public class TaskItem
     public DateTime? DueDate { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int? ProjectId { get; set; }
+    public Project? Project { get; set; }
+
+    [StringLength(100)]
+    public string? AssignedTo { get; set; }
+
+    public ICollection<TaskTag> TaskTags { get; set; } = [];
+    public ICollection<TaskComment> Comments { get; set; } = [];
 }

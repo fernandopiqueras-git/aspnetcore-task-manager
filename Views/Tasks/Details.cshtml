@@ -1,13 +1,10 @@
 @using AspNetCoreTaskManager.Models
 @model TaskItem
-<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>@Model.Title</title><link rel="stylesheet" href="~/css/site.css" /></head>
-<body><main class="form-page details"><a asp-action="Index">← Volver</a><h1>@Model.Title</h1>
-@if (!string.IsNullOrWhiteSpace(Model.Description)) { <p>@Model.Description</p> }
-<dl><dt>Estado</dt><dd>@StatusText(Model.Status)</dd><dt>Prioridad</dt><dd>@PriorityText(Model.Priority)</dd><dt>Fecha límite</dt><dd>@(Model.DueDate?.ToString("dd/MM/yyyy") ?? "Sin fecha")</dd><dt>Creada</dt><dd>@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd></dl>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>@Model.Title</title><link rel="stylesheet" href="~/css/site.css" /></head>
+<body><main class="form-page details"><a asp-action="Index">← Volver</a><h1>@Model.Title</h1>@if (!string.IsNullOrWhiteSpace(Model.Description)) { <p>@Model.Description</p> }
+<dl><dt>Estado</dt><dd>@Model.Status</dd><dt>Prioridad</dt><dd>@Model.Priority</dd><dt>Proyecto</dt><dd>@(Model.Project?.Name ?? "Sin proyecto")</dd><dt>Responsable</dt><dd>@(Model.AssignedTo ?? "Sin asignar")</dd><dt>Fecha límite</dt><dd>@(Model.DueDate?.ToString("dd/MM/yyyy") ?? "Sin fecha")</dd></dl>
+<div class="tags">@foreach (var taskTag in Model.TaskTags) { <span>@taskTag.Tag.Name</span> }</div>
+<h2>Comentarios</h2>@foreach (var comment in Model.Comments.OrderByDescending(x => x.CreatedAt)) { <article class="comment"><p>@comment.Text</p><time>@comment.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</time></article> }
+<form asp-action="AddComment" method="post"><input type="hidden" name="id" value="@Model.Id" /><textarea name="text" maxlength="500" required placeholder="Escribe un comentario"></textarea><button class="primary">Añadir comentario</button></form>
 <div class="dialog-actions"><a asp-action="Edit" asp-route-id="@Model.Id">Editar</a><a asp-action="Delete" asp-route-id="@Model.Id" class="danger">Eliminar</a></div>
 </main></body></html>
-@functions {
-    private static string StatusText(WorkStatus value) => value switch { WorkStatus.Pending => "Pendiente", WorkStatus.InProgress => "En curso", WorkStatus.Completed => "Terminada", _ => value.ToString() };
-    private static string PriorityText(TaskPriority value) => value switch { TaskPriority.Low => "Baja", TaskPriority.Medium => "Media", TaskPriority.High => "Alta", _ => value.ToString() };
-}

@@ -6,14 +6,16 @@ namespace AspNetCoreTaskManager.Repositories;
 
 public class EfTaskRepository(AppDbContext database) : ITaskRepository
 {
+    public AppDbContext Database => database;
+
     public IReadOnlyCollection<TaskItem> GetAll()
     {
-        return database.Tasks.AsNoTracking().ToArray();
+        return TaskQuery().ToArray();
     }
 
     public TaskItem? GetById(int id)
     {
-        return database.Tasks.AsNoTracking().FirstOrDefault(item => item.Id == id);
+        return TaskQuery().FirstOrDefault(item => item.Id == id);
     }
 
     public TaskItem Add(TaskItem item)
@@ -48,5 +50,14 @@ public class EfTaskRepository(AppDbContext database) : ITaskRepository
         database.Tasks.Remove(item);
         database.SaveChanges();
         return true;
+    }
+
+    private IQueryable<TaskItem> TaskQuery()
+    {
+        return database.Tasks
+            .AsNoTracking()
+            .Include(item => item.Project)
+            .Include(item => item.TaskTags).ThenInclude(taskTag => taskTag.Tag)
+            .Include(item => item.Comments);
     }
 }
