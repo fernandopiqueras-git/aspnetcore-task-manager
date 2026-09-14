@@ -1,0 +1,142 @@
+@using AspNetCoreTaskManager.Models
+@model IReadOnlyCollection<TaskItem>
+@{
+    var pending = Model.Count(item => item.Status == WorkStatus.Pending);
+    var inProgress = Model.Count(item => item.Status == WorkStatus.InProgress);
+    var completed = Model.Count(item => item.Status == WorkStatus.Completed);
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <main class="container">
+        <header>
+            <div>
+                <span class="eyebrow">ASP.NET Core MVC</span>
+                <h1>Task Manager</h1>
+                <p>Organiza el trabajo por estado y prioridad.</p>
+            </div>
+            <button type="button" class="primary" onclick="document.querySelector('#new-task').showModal()">Nueva tarea</button>
+        </header>
+
+        @if (ViewData["Error"] is string error)
+        {
+            <div class="notice error">@error</div>
+        }
+
+        <section class="summary">
+            <article><strong>@pending</strong><span>Pendientes</span></article>
+            <article><strong>@inProgress</strong><span>En curso</span></article>
+            <article><strong>@completed</strong><span>Terminadas</span></article>
+        </section>
+
+        <form method="get" class="filters">
+            <input name="search" value="@ViewBag.Search" placeholder="Buscar tareas" />
+            <select name="status">
+                <option value="">Todos los estados</option>
+                @foreach (var value in Enum.GetValues<WorkStatus>())
+                {
+                    <option value="@value" selected="@(ViewBag.Status?.ToString() == value.ToString() ? "selected" : null)">@StatusText(value)</option>
+                }
+            </select>
+            <select name="priority">
+                <option value="">Todas las prioridades</option>
+                @foreach (var value in Enum.GetValues<TaskPriority>())
+                {
+                    <option value="@value" selected="@(ViewBag.Priority?.ToString() == value.ToString() ? "selected" : null)">@PriorityText(value)</option>
+                }
+            </select>
+            <button type="submit">Filtrar</button>
+            <a asp-action="Index">Limpiar</a>
+        </form>
+
+        <section class="board">
+            @foreach (var status in Enum.GetValues<WorkStatus>())
+            {
+                <div class="column">
+                    <h2>@StatusText(status)</h2>
+                    @foreach (var item in Model.Where(item => item.Status == status))
+                    {
+                        <article class="task">
+                            <div class="task-top">
+                                <span class="priority @item.Priority.ToString().ToLowerInvariant()">@PriorityText(item.Priority)</span>
+                                @if (item.DueDate.HasValue)
+                                {
+                                    <time datetime="@item.DueDate.Value.ToString("yyyy-MM-dd")">@item.DueDate.Value.ToString("dd/MM/yyyy")</time>
+                                }
+                            </div>
+                            <h3>@item.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                            {
+                                <p>@item.Description</p>
+                            }
+                            <div class="actions">
+                                <form asp-action="ChangeStatus" method="post">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <select name="status" onchange="this.form.submit()">
+                                        @foreach (var value in Enum.GetValues<WorkStatus>())
+                                        {
+                                            <option value="@value" selected="@(item.Status == value ? "selected" : null)">@StatusText(value)</option>
+                                        }
+                                    </select>
+                                </form>
+                                <form asp-action="Delete" method="post" onsubmit="return confirm('¿Eliminar esta tarea?')">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    </main>
+
+    <dialog id="new-task">
+        <form asp-action="Create" method="post">
+            <div class="dialog-header">
+                <h2>Nueva tarea</h2>
+                <button type="button" onclick="this.closest('dialog').close()">×</button>
+            </div>
+            <label>Título<input name="Title" maxlength="100" required /></label>
+            <label>Descripción<textarea name="Description" maxlength="500"></textarea></label>
+            <label>Prioridad
+                <select name="Priority">
+                    @foreach (var value in Enum.GetValues<TaskPriority>())
+                    {
+                        <option value="@value" selected="@(value == TaskPriority.Medium ? "selected" : null)">@PriorityText(value)</option>
+                    }
+                </select>
+            </label>
+            <label>Fecha límite<input type="date" name="DueDate" /></label>
+            <div class="dialog-actions">
+                <button type="button" onclick="this.closest('dialog').close()">Cancelar</button>
+                <button type="submit" class="primary">Crear tarea</button>
+            </div>
+        </form>
+    </dialog>
+</body>
+</html>
+
+@functions {
+    private static string StatusText(WorkStatus status) => status switch
+    {
+        WorkStatus.Pending => "Pendiente",
+        WorkStatus.InProgress => "En curso",
+        WorkStatus.Completed => "Terminada",
+        _ => status.ToString()
+    };
+
+    private static string PriorityText(TaskPriority priority) => priority switch
+    {
+        TaskPriority.Low => "Baja",
+        TaskPriority.Medium => "Media",
+        TaskPriority.High => "Alta",
+        _ => priority.ToString()
+    };
+}

@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreTaskManager", "AspNetCoreTaskManager.csproj", "{55C15031-77BD-4BBB-8014-FA872EFCB639}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCoreTaskManager.Tests", "AspNetCoreTaskManager.Tests\AspNetCoreTaskManager.Tests.csproj", "{B408F438-FDB1-4C42-89BB-486F445C3857}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55C15031-77BD-4BBB-8014-FA872EFCB639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C15031-77BD-4BBB-8014-FA872EFCB639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55C15031-77BD-4BBB-8014-FA872EFCB639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55C15031-77BD-4BBB-8014-FA872EFCB639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B408F438-FDB1-4C42-89BB-486F445C3857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B408F438-FDB1-4C42-89BB-486F445C3857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B408F438-FDB1-4C42-89BB-486F445C3857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B408F438-FDB1-4C42-89BB-486F445C3857}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
