@@ -1,0 +1,7 @@
+@using AspNetCoreTaskManager.Models
+@model TaskItem
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Eliminar tarea</title><link rel="stylesheet" href="~/css/site.css" /></head>
+<body><main class="form-page"><a asp-action="Details" asp-route-id="@Model.Id">← Volver</a><h1>Eliminar tarea</h1><p>¿Seguro que quieres eliminar <strong>@Model.Title</strong>?</p>
+<form asp-action="Delete" method="post"><input type="hidden" name="id" value="@Model.Id" /><div class="dialog-actions"><a asp-action="Details" asp-route-id="@Model.Id">Cancelar</a><button type="submit" class="danger">Eliminar definitivamente</button></div></form>
+</main></body></html>

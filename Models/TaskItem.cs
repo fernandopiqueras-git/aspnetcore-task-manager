@@ -17,6 +17,7 @@ public class TaskItem
     public WorkStatus Status { get; set; } = WorkStatus.Pending;
 
     [DataType(DataType.Date)]
+    [FutureOrToday]
     public DateTime? DueDate { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

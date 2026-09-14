@@ -2,7 +2,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input, select, textarea { font: inherit; }
-button, .filters a { border: 0; border-radius: .6rem; padding: .7rem 1rem; cursor: pointer; }
+button, .filters a, .actions a, .dialog-actions a { border: 0; border-radius: .6rem; padding: .7rem 1rem; cursor: pointer; text-decoration: none; }
 .container { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2.5rem 0; }
 header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 h1 { margin: .2rem 0; font-size: clamp(2rem, 5vw, 3rem); }
@@ -15,13 +15,14 @@ header p { margin: 0; color: #667085; }
 .summary span { color: #667085; }
 .filters { display: flex; gap: .6rem; padding: 1rem; margin-bottom: 1rem; border-radius: .8rem; background: white; }
 .filters input { flex: 1; }
-.filters input, .filters select, dialog input, dialog select, dialog textarea { border: 1px solid #d0d5dd; border-radius: .5rem; padding: .7rem; }
-.filters a { color: #344054; text-decoration: none; background: #eaecf0; }
+.filters input, .filters select, dialog input, dialog select, dialog textarea, .form-page input, .form-page select, .form-page textarea { border: 1px solid #d0d5dd; border-radius: .5rem; padding: .7rem; }
+.filters a { color: #344054; background: #eaecf0; }
 .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; align-items: start; }
 .column { min-height: 300px; padding: 1rem; border-radius: .8rem; background: #e9edf4; }
 .column h2 { margin-top: 0; font-size: 1rem; }
 .task { margin-top: .8rem; padding: 1rem; border-radius: .7rem; background: white; box-shadow: 0 4px 12px #1018280a; }
 .task h3 { margin: .7rem 0 .3rem; }
+.task h3 a { color: #172033; text-decoration: none; }
 .task p { color: #667085; overflow-wrap: anywhere; }
 .task-top, .actions { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
 .priority { padding: .25rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
@@ -29,22 +30,25 @@ header p { margin: 0; color: #667085; }
 .priority.medium { color: #b54708; background: #fffaeb; }
 .priority.high { color: #b42318; background: #fef3f2; }
 time { color: #667085; font-size: .75rem; }
-.actions { margin-top: 1rem; }
+.actions { margin-top: 1rem; flex-wrap: wrap; }
 .actions select { border: 1px solid #d0d5dd; border-radius: .5rem; padding: .45rem; }
-.danger { padding: .5rem; color: #b42318; background: #fef3f2; }
-.notice { margin-top: 1rem; padding: .8rem; border-radius: .6rem; }
-.notice.success { color: #027a48; background: #ecfdf3; }
-.notice.error { color: #b42318; background: #fef3f2; }
+.actions a { padding: .45rem; color: #344054; background: #eaecf0; font-size: .85rem; }
+.danger { padding: .5rem; color: #b42318 !important; background: #fef3f2; }
 dialog { width: min(500px, calc(100% - 2rem)); border: 0; border-radius: 1rem; box-shadow: 0 20px 50px #10182833; }
 dialog::backdrop { background: #10182899; }
-dialog form, dialog label { display: grid; gap: .5rem; }
-dialog form { gap: 1rem; }
-dialog textarea { min-height: 100px; resize: vertical; }
+dialog form, dialog label, .form-page form, .form-page label { display: grid; gap: .5rem; }
+dialog form, .form-page form { gap: 1rem; }
+dialog textarea, .form-page textarea { min-height: 100px; resize: vertical; }
 .dialog-header, .dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
 .dialog-header h2 { margin: 0; }
 .dialog-header button { padding: .3rem .6rem; background: transparent; font-size: 1.5rem; }
-.dialog-actions { justify-content: flex-end; }
-@media (max-width: 760px) {
-    .board { grid-template-columns: 1fr; }
-    .filters { flex-direction: column; }
-}
+.dialog-actions { justify-content: flex-end; margin-top: 1rem; }
+.dialog-actions a { color: #344054; background: #eaecf0; }
+.validation { color: #b42318; }
+.validation:empty { display: none; }
+.form-page { width: min(650px, calc(100% - 2rem)); margin: 3rem auto; padding: 2rem; border-radius: 1rem; background: white; box-shadow: 0 12px 30px #10182812; }
+.form-page > a { color: #4f46e5; text-decoration: none; }
+.details dl { display: grid; grid-template-columns: 130px 1fr; gap: .7rem; margin: 2rem 0; }
+.details dt { color: #667085; font-weight: 600; }
+.details dd { margin: 0; }
+@media (max-width: 760px) { .board { grid-template-columns: 1fr; } .filters { flex-direction: column; } }

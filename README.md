@@ -13,13 +13,14 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 
 ## Funciones
 
-- Crear y eliminar tareas
+- Crear, consultar, editar y eliminar tareas
+- Confirmación antes de eliminar
 - Cambiar el estado de una tarea
+- Validar títulos, descripciones y fechas límite
 - Filtrar por texto, estado y prioridad
-- Persistencia en SQL Server
-- Migraciones de Entity Framework Core
+- Persistencia en SQL Server mediante migraciones
 - Diseño responsive
-- Pruebas unitarias del repositorio y el controlador
+- Pruebas unitarias del repositorio, controlador y validaciones
 
 ## Ejecución
 
@@ -27,8 +28,6 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 dotnet restore
 dotnet run
 ```
-
-La aplicación crea y actualiza la base de datos local mediante migraciones al arrancar.
 
 ## Pruebas
 
