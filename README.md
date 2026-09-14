@@ -5,6 +5,8 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 ## Tecnologías
 
 - ASP.NET Core MVC
+- Entity Framework Core 8
+- SQL Server LocalDB
 - C#
 - Razor
 - xUnit
@@ -14,8 +16,9 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 - Crear y eliminar tareas
 - Cambiar el estado de una tarea
 - Filtrar por texto, estado y prioridad
+- Persistencia en SQL Server
+- Migraciones de Entity Framework Core
 - Diseño responsive
-- Repositorio en memoria
 - Pruebas unitarias del repositorio y el controlador
 
 ## Ejecución
@@ -24,6 +27,8 @@ Aplicación web para gestionar tareas por estado, prioridad y fecha límite.
 dotnet restore
 dotnet run
 ```
+
+La aplicación crea y actualiza la base de datos local mediante migraciones al arrancar.
 
 ## Pruebas
 

@@ -1,7 +1,9 @@
 using AspNetCoreTaskManager.Controllers;
+using AspNetCoreTaskManager.Data;
 using AspNetCoreTaskManager.Models;
 using AspNetCoreTaskManager.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreTaskManager.Tests;
 
@@ -10,7 +12,8 @@ public class TasksControllerTests
     [Fact]
     public void Index_FiltersByStatusPriorityAndSearch()
     {
-        var repository = new InMemoryTaskRepository();
+        using var database = CreateDatabase();
+        var repository = new EfTaskRepository(database);
         repository.Add(new TaskItem { Title = "Preparar API", Status = WorkStatus.InProgress, Priority = TaskPriority.High });
         repository.Add(new TaskItem { Title = "Documentar", Status = WorkStatus.Pending, Priority = TaskPriority.Low });
         var controller = new TasksController(repository);
@@ -23,67 +26,79 @@ public class TasksControllerTests
     }
 
     [Fact]
-    public void Create_ValidTask_AddsItAndRedirects()
+    public void Create_ValidTask_PersistsItAndRedirects()
     {
-        var repository = new InMemoryTaskRepository();
-        var controller = new TasksController(repository);
+        using var database = CreateDatabase();
+        var controller = new TasksController(new EfTaskRepository(database));
 
         var result = controller.Create(new TaskItem { Title = "Nueva" });
 
         Assert.IsType<RedirectToActionResult>(result);
-        Assert.Single(repository.GetAll());
+        Assert.Single(database.Tasks);
     }
 
     [Fact]
-    public void Create_InvalidTask_DoesNotAddIt()
+    public void Create_InvalidTask_DoesNotPersistIt()
     {
-        var repository = new InMemoryTaskRepository();
-        var controller = new TasksController(repository);
+        using var database = CreateDatabase();
+        var controller = new TasksController(new EfTaskRepository(database));
         controller.ModelState.AddModelError("Title", "Obligatorio");
 
         var result = controller.Create(new TaskItem());
 
         Assert.IsType<ViewResult>(result);
-        Assert.Empty(repository.GetAll());
+        Assert.Empty(database.Tasks);
     }
 
     [Fact]
-    public void ChangeStatus_ExistingTask_UpdatesIt()
+    public void ChangeStatus_ExistingTask_PersistsNewStatus()
     {
-        var repository = new InMemoryTaskRepository();
+        using var database = CreateDatabase();
+        var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Cambiar" });
         var controller = new TasksController(repository);
 
         var result = controller.ChangeStatus(task.Id, WorkStatus.Completed);
 
         Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(WorkStatus.Completed, repository.GetById(task.Id)?.Status);
+        Assert.Equal(WorkStatus.Completed, database.Tasks.AsNoTracking().Single().Status);
     }
 
     [Fact]
     public void ChangeStatus_MissingTask_ReturnsNotFound()
     {
-        var controller = new TasksController(new InMemoryTaskRepository());
+        using var database = CreateDatabase();
+        var controller = new TasksController(new EfTaskRepository(database));
         Assert.IsType<NotFoundResult>(controller.ChangeStatus(99, WorkStatus.Completed));
     }
 
     [Fact]
     public void Delete_ExistingTask_RemovesIt()
     {
-        var repository = new InMemoryTaskRepository();
+        using var database = CreateDatabase();
+        var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Eliminar" });
         var controller = new TasksController(repository);
 
         var result = controller.Delete(task.Id);
 
         Assert.IsType<RedirectToActionResult>(result);
-        Assert.Empty(repository.GetAll());
+        Assert.Empty(database.Tasks);
     }
 
     [Fact]
     public void Delete_MissingTask_ReturnsNotFound()
     {
-        var controller = new TasksController(new InMemoryTaskRepository());
+        using var database = CreateDatabase();
+        var controller = new TasksController(new EfTaskRepository(database));
         Assert.IsType<NotFoundResult>(controller.Delete(99));
+    }
+
+    private static AppDbContext CreateDatabase()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        return new AppDbContext(options);
     }
 }
