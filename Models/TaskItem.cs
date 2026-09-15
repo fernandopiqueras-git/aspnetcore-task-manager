@@ -20,6 +20,8 @@ public class TaskItem
     [FutureOrToday]
     public DateTime? DueDate { get; set; }
 
+    public DateTime? StartAt { get; set; }
+    public DateTime? EndAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int? ProjectId { get; set; }
     public Project? Project { get; set; }

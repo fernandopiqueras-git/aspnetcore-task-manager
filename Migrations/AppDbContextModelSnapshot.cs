@@ -49,8 +49,10 @@ public class AppDbContextModelSnapshot : ModelSnapshot
             entity.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
             entity.Property<string>("Description").HasMaxLength(500).HasColumnType("nvarchar(500)");
             entity.Property<DateTime?>("DueDate").HasColumnType("datetime2");
+            entity.Property<DateTime?>("EndAt").HasColumnType("datetime2");
             entity.Property<int>("Priority").HasColumnType("int");
             entity.Property<int?>("ProjectId").HasColumnType("int");
+            entity.Property<DateTime?>("StartAt").HasColumnType("datetime2");
             entity.Property<int>("Status").HasColumnType("int");
             entity.Property<string>("Title").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
             entity.HasKey("Id");
