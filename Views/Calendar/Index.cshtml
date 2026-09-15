@@ -19,7 +19,7 @@
             <h1>Calendario</h1>
             <p>Crea, mueve y ajusta la duración de las tareas.</p>
         </div>
-        <a class="primary button-link" asp-controller="Tasks" asp-action="Index">Volver al tablero</a>
+        <nav class="view-navigation"><a asp-controller="Tasks" asp-action="Index">Tablero</a><a asp-controller="TaskList" asp-action="Index">Lista</a><a class="active" asp-controller="Calendar" asp-action="Index">Calendario</a></nav>
     </header>
     <section class="calendar-panel">
         <div id="calendar"></div>

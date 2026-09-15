@@ -1,0 +1,15 @@
+.view-navigation { display: flex; gap: .4rem; flex-wrap: wrap; }
+.view-navigation a { border-radius: .6rem; padding: .7rem 1rem; color: #4f46e5; background: #eef2ff; text-decoration: none; }
+.view-navigation a.active { color: white; background: #4f46e5; }
+.list-panel { margin-top: 2rem; padding: 1rem; border-radius: 1rem; background: white; box-shadow: 0 4px 16px #1018280a; }
+.list-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.table-scroll { overflow-x: auto; }
+.editable-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+.editable-table th { padding: .7rem; color: #667085; text-align: left; font-size: .8rem; }
+.editable-table td { padding: .5rem; border-top: 1px solid #eaecf0; }
+.editable-table input, .editable-table select { width: 100%; min-width: 115px; padding: .55rem; }
+.editable-table td:first-child input { min-width: 180px; }
+.editable-table .save-row { white-space: nowrap; }
+.empty-state { padding: 3rem; color: #667085; text-align: center; }
+#token-form { display: none; }
+@media (max-width: 760px) { header { align-items: flex-start; flex-direction: column; } }

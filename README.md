@@ -23,17 +23,23 @@ Aplicación web para gestionar y organizar tareas.
 - API JSON para consultar y modificar la planificación de tareas
 - Calendario mensual y semanal
 - Creación, edición, arrastre y redimensionado de tareas en el calendario
+- Lista editable sincronizada con calendario y tablero
 - Persistencia mediante migraciones
 - Diseño responsive
 - Pruebas unitarias
 
-## Calendario
+## Vistas
 
-La vista /Calendar utiliza FullCalendar 6.1.19 desde jsDelivr. Permite cambiar entre mes y semana, crear una tarea pulsando una fecha, editarla al pulsar sobre ella y modificar sus fechas mediante arrastre o redimensionado.
+- /Tasks muestra el tablero y el CRUD completo.
+- /TaskList muestra todas las tareas y permite editar su planificación en línea.
+- /Calendar muestra el calendario mensual y semanal con FullCalendar 6.1.19 desde jsDelivr.
+
+Las tres vistas utilizan los mismos datos persistidos. La lista y el calendario guardan mediante la API y reflejan los cambios al volver a cargarse.
 
 ## API de planificación
 
 - GET /api/tasks?start=2026-09-15T00:00:00&end=2026-09-16T00:00:00
+- GET /api/tasks/list
 - GET /api/tasks/{id}
 - POST /api/tasks
 - PUT /api/tasks/{id}

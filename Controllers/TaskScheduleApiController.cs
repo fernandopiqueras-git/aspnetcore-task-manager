@@ -24,7 +24,23 @@ public class TaskScheduleApiController(AppDbContext database) : ControllerBase
                 (item.EndAt ?? item.StartAt.Value) >= start)
             .OrderBy(item => item.StartAt)
             .AsEnumerable()
-            .Select(ToDto)
+            .Select(ToCalendarDto)
+            .ToArray();
+
+        return Ok(tasks);
+    }
+
+    [HttpGet("list")]
+    public ActionResult<IReadOnlyCollection<TaskListDto>> GetList()
+    {
+        var tasks = database.Tasks
+            .AsNoTracking()
+            .Include(item => item.Project)
+            .OrderBy(item => item.Status)
+            .ThenBy(item => item.StartAt)
+            .ThenBy(item => item.Title)
+            .AsEnumerable()
+            .Select(ToListDto)
             .ToArray();
 
         return Ok(tasks);
@@ -37,7 +53,7 @@ public class TaskScheduleApiController(AppDbContext database) : ControllerBase
         if (item?.StartAt is null)
             return NotFound();
 
-        return Ok(ToDto(item));
+        return Ok(ToCalendarDto(item));
     }
 
     [HttpPost]
@@ -53,7 +69,7 @@ public class TaskScheduleApiController(AppDbContext database) : ControllerBase
         database.Tasks.Add(item);
         database.SaveChanges();
         database.Entry(item).Reference(task => task.Project).Load();
-        return CreatedAtAction(nameof(GetById), new { id = item.Id }, ToDto(item));
+        return CreatedAtAction(nameof(GetById), new { id = item.Id }, ToCalendarDto(item));
     }
 
     [HttpPut("{id:int}")]
@@ -74,7 +90,7 @@ public class TaskScheduleApiController(AppDbContext database) : ControllerBase
             database.Entry(item).Reference(task => task.Project).Load();
         else
             item.Project = null;
-        return Ok(ToDto(item));
+        return Ok(ToCalendarDto(item));
     }
 
     private void ValidateProject(int? projectId)
@@ -95,12 +111,26 @@ public class TaskScheduleApiController(AppDbContext database) : ControllerBase
         item.AssignedTo = string.IsNullOrWhiteSpace(request.AssignedTo) ? null : request.AssignedTo.Trim();
     }
 
-    private static TaskCalendarDto ToDto(TaskItem item)
+    private static TaskCalendarDto ToCalendarDto(TaskItem item)
     {
         return new TaskCalendarDto(
             item.Id,
             item.Title,
             item.StartAt!.Value,
+            item.EndAt,
+            item.Status,
+            item.Priority,
+            item.ProjectId,
+            item.Project?.Name,
+            item.AssignedTo);
+    }
+
+    private static TaskListDto ToListDto(TaskItem item)
+    {
+        return new TaskListDto(
+            item.Id,
+            item.Title,
+            item.StartAt,
             item.EndAt,
             item.Status,
             item.Priority,

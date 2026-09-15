@@ -1,0 +1,151 @@
+@model AspNetCoreTaskManager.ViewModels.CalendarViewModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lista · Task Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/task-list.css" />
+</head>
+<body>
+<main class="container">
+    <header>
+        <div>
+            <span class="eyebrow">PLANIFICACIÓN</span>
+            <h1>Lista editable</h1>
+            <p>Edita la planificación completa sin salir de la lista.</p>
+        </div>
+        <nav class="view-navigation">
+            <a asp-controller="Tasks" asp-action="Index">Tablero</a>
+            <a class="active" asp-controller="TaskList" asp-action="Index">Lista</a>
+            <a asp-controller="Calendar" asp-action="Index">Calendario</a>
+        </nav>
+    </header>
+    <section class="list-panel">
+        <div class="list-toolbar">
+            <strong id="task-count"></strong>
+            <button type="button" id="refresh-list">Actualizar</button>
+        </div>
+        <div id="list-errors" class="validation"></div>
+        <div class="table-scroll">
+            <table class="editable-table">
+                <thead><tr><th>Título</th><th>Inicio</th><th>Final</th><th>Estado</th><th>Prioridad</th><th>Proyecto</th><th>Responsable</th><th></th></tr></thead>
+                <tbody id="task-rows"></tbody>
+            </table>
+        </div>
+        <div id="empty-list" class="empty-state" hidden>No hay tareas.</div>
+        <form id="token-form">@Html.AntiForgeryToken()</form>
+    </section>
+</main>
+
+<datalist id="responsible-people">
+    @foreach (var name in Model.ResponsiblePeople)
+    {
+        <option value="@name"></option>
+    }
+</datalist>
+
+<template id="task-row-template">
+    <tr>
+        <td><input data-field="title" maxlength="100" required /></td>
+        <td><input data-field="start" type="datetime-local" required /></td>
+        <td><input data-field="end" type="datetime-local" /></td>
+        <td><select data-field="status"><option value="0">Pendiente</option><option value="1">En curso</option><option value="2">Terminada</option></select></td>
+        <td><select data-field="priority"><option value="0">Baja</option><option value="1">Media</option><option value="2">Alta</option></select></td>
+        <td><select data-field="projectId"><option value="">Sin proyecto</option>@foreach (var project in Model.Projects) { <option value="@project.Id">@project.Name</option> }</select></td>
+        <td><input data-field="assignedTo" maxlength="100" list="responsible-people" /></td>
+        <td><button type="button" class="save-row primary">Guardar</button></td>
+    </tr>
+</template>
+
+<script>
+const rows = document.querySelector("#task-rows")
+const template = document.querySelector("#task-row-template")
+const errors = document.querySelector("#list-errors")
+const empty = document.querySelector("#empty-list")
+const count = document.querySelector("#task-count")
+const token = document.querySelector('#token-form input[name="__RequestVerificationToken"]').value
+
+const toInputValue = value => {
+    if (!value) return ""
+    const date = new Date(value)
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    return local.toISOString().slice(0, 16)
+}
+
+const showError = message => {
+    errors.textContent = message
+}
+
+const saveTask = async (id, body) => {
+    const response = await fetch(`/api/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": token
+        },
+        body: JSON.stringify(body)
+    })
+    if (!response.ok) {
+        const problem = await response.json().catch(() => null)
+        const messages = problem?.errors ? Object.values(problem.errors).flat() : [problem?.error || "No se pudo guardar la tarea."]
+        throw new Error(messages.join(" "))
+    }
+}
+
+const addRow = task => {
+    const row = template.content.firstElementChild.cloneNode(true)
+    const field = name => row.querySelector(`[data-field="${name}"]`)
+    field("title").value = task.title
+    field("start").value = toInputValue(task.start)
+    field("end").value = toInputValue(task.end)
+    field("status").value = task.status
+    field("priority").value = task.priority
+    field("projectId").value = task.projectId ?? ""
+    field("assignedTo").value = task.assignedTo || ""
+    row.querySelector(".save-row").addEventListener("click", async event => {
+        const button = event.currentTarget
+        errors.textContent = ""
+        button.disabled = true
+        try {
+            await saveTask(task.id, {
+                title: field("title").value,
+                start: field("start").value,
+                end: field("end").value || null,
+                status: Number(field("status").value),
+                priority: Number(field("priority").value),
+                projectId: field("projectId").value ? Number(field("projectId").value) : null,
+                assignedTo: field("assignedTo").value || null
+            })
+            button.textContent = "Guardado"
+            setTimeout(() => button.textContent = "Guardar", 1200)
+        } catch (error) {
+            showError(error.message)
+        } finally {
+            button.disabled = false
+        }
+    })
+    rows.append(row)
+}
+
+const loadTasks = async () => {
+    errors.textContent = ""
+    try {
+        const response = await fetch("/api/tasks/list")
+        if (!response.ok) throw new Error("No se pudieron cargar las tareas.")
+        const tasks = await response.json()
+        rows.replaceChildren()
+        tasks.forEach(addRow)
+        count.textContent = `${tasks.length} ${tasks.length === 1 ? "tarea" : "tareas"}`
+        empty.hidden = tasks.length !== 0
+    } catch (error) {
+        showError(error.message)
+    }
+}
+
+document.querySelector("#refresh-list").addEventListener("click", loadTasks)
+loadTasks()
+</script>
+</body>
+</html>

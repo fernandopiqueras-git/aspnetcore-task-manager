@@ -35,8 +35,12 @@ public class EfTaskRepository(AppDbContext database) : ITaskRepository
             return false;
 
         var createdAt = stored.CreatedAt;
+        var startAt = stored.StartAt;
+        var endAt = stored.EndAt;
         database.Entry(stored).CurrentValues.SetValues(item);
         stored.CreatedAt = createdAt;
+        stored.StartAt = startAt;
+        stored.EndAt = endAt;
         database.SaveChanges();
         return true;
     }

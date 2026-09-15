@@ -60,3 +60,7 @@ fieldset { border: 1px solid #d0d5dd; border-radius: .6rem; }
 .comment { margin: .6rem 0; padding: .8rem; border-radius: .6rem; background: #f9fafb; }
 .comment p { margin-top: 0; }
 @media (max-width: 760px) { .board { grid-template-columns: 1fr; } .filters { flex-direction: column; } .management { grid-template-columns: 1fr; } }
+
+.view-navigation { display: flex; gap: .4rem; flex-wrap: wrap; }
+.view-navigation a { border-radius: .6rem; padding: .7rem 1rem; color: #4f46e5; background: #eef2ff; text-decoration: none; }
+.view-navigation a.active { color: white; background: #4f46e5; }
