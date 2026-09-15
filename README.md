@@ -9,6 +9,7 @@ Aplicación web para gestionar y organizar tareas.
 - SQL Server LocalDB
 - C#
 - Razor
+- FullCalendar 6.1.19
 - xUnit
 
 ## Funciones
@@ -20,28 +21,30 @@ Aplicación web para gestionar y organizar tareas.
 - Comentarios en las tareas
 - Búsqueda y filtros
 - API JSON para consultar y modificar la planificación de tareas
+- Calendario mensual y semanal
+- Creación, edición, arrastre y redimensionado de tareas en el calendario
 - Persistencia mediante migraciones
 - Diseño responsive
 - Pruebas unitarias
 
+## Calendario
+
+La vista /Calendar utiliza FullCalendar 6.1.19 desde jsDelivr. Permite cambiar entre mes y semana, crear una tarea pulsando una fecha, editarla al pulsar sobre ella y modificar sus fechas mediante arrastre o redimensionado.
+
 ## API de planificación
 
-- `GET /api/tasks?start=2026-09-15T00:00:00&end=2026-09-16T00:00:00`
-- `GET /api/tasks/{id}`
-- `POST /api/tasks`
-- `PUT /api/tasks/{id}`
+- GET /api/tasks?start=2026-09-15T00:00:00&end=2026-09-16T00:00:00
+- GET /api/tasks/{id}
+- POST /api/tasks
+- PUT /api/tasks/{id}
 
-Las operaciones de escritura requieren un token antiforgery en la cabecera `X-CSRF-TOKEN`.
+Las operaciones de escritura requieren un token antiforgery en la cabecera X-CSRF-TOKEN.
 
 ## Ejecución
 
-```bash
-dotnet restore
-dotnet run
-```
+    dotnet restore
+    dotnet run
 
 ## Pruebas
 
-```bash
-dotnet test
-```
+    dotnet test

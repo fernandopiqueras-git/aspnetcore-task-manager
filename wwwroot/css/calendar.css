@@ -1,0 +1,17 @@
+.button-link { display: inline-block; border-radius: .6rem; padding: .7rem 1rem; text-decoration: none; }
+.calendar-panel { margin-top: 2rem; padding: 1.25rem; border-radius: 1rem; background: white; box-shadow: 0 4px 16px #1018280a; }
+#calendar { min-height: 680px; }
+.fc .fc-button-primary { border-color: #4f46e5; background: #4f46e5; }
+.fc .fc-button-primary:hover, .fc .fc-button-primary:focus { border-color: #4338ca; background: #4338ca; }
+.fc .fc-button-primary:disabled { border-color: #818cf8; background: #818cf8; }
+.fc .fc-button-primary:not(:disabled).fc-button-active { border-color: #3730a3; background: #3730a3; }
+.fc-event { cursor: pointer; }
+.calendar-priority-0 { border-color: #039855 !important; background: #039855 !important; }
+.calendar-priority-1 { border-color: #dc6803 !important; background: #dc6803 !important; }
+.calendar-priority-2 { border-color: #d92d20 !important; background: #d92d20 !important; }
+.date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 760px) {
+    .calendar-panel { padding: .5rem; overflow-x: auto; }
+    #calendar { min-width: 650px; }
+    .date-grid { grid-template-columns: 1fr; }
+}

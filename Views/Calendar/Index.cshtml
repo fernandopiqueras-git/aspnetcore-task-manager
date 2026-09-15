@@ -1,0 +1,238 @@
+@using AspNetCoreTaskManager.Models
+@model AspNetCoreTaskManager.ViewModels.CalendarViewModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calendario · Task Manager</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/calendar.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/locales-all.global.min.js"></script>
+</head>
+<body>
+<main class="container">
+    <header>
+        <div>
+            <span class="eyebrow">PLANIFICACIÓN</span>
+            <h1>Calendario</h1>
+            <p>Crea, mueve y ajusta la duración de las tareas.</p>
+        </div>
+        <a class="primary button-link" asp-controller="Tasks" asp-action="Index">Volver al tablero</a>
+    </header>
+    <section class="calendar-panel">
+        <div id="calendar"></div>
+    </section>
+</main>
+
+<dialog id="task-dialog">
+    <form id="task-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="task-id" />
+        <div class="dialog-header">
+            <h2 id="dialog-title">Nueva tarea</h2>
+            <button type="button" data-close>×</button>
+        </div>
+        <div id="calendar-errors" class="validation"></div>
+        <label>Título<input id="task-title" maxlength="100" required /></label>
+        <div class="date-grid">
+            <label>Inicio<input id="task-start" type="datetime-local" required /></label>
+            <label>Final<input id="task-end" type="datetime-local" /></label>
+        </div>
+        <label>Estado
+            <select id="task-status">
+                <option value="0">Pendiente</option>
+                <option value="1">En curso</option>
+                <option value="2">Terminada</option>
+            </select>
+        </label>
+        <label>Prioridad
+            <select id="task-priority">
+                <option value="0">Baja</option>
+                <option value="1" selected>Media</option>
+                <option value="2">Alta</option>
+            </select>
+        </label>
+        <label>Proyecto
+            <select id="task-project">
+                <option value="">Sin proyecto</option>
+                @foreach (var project in Model.Projects)
+                {
+                    <option value="@project.Id">@project.Name</option>
+                }
+            </select>
+        </label>
+        <label>Responsable
+            <input id="task-assigned" maxlength="100" list="responsible-people" />
+            <datalist id="responsible-people">
+                @foreach (var name in Model.ResponsiblePeople)
+                {
+                    <option value="@name"></option>
+                }
+            </datalist>
+        </label>
+        <div class="dialog-actions">
+            <button type="button" data-close>Cancelar</button>
+            <button class="primary">Guardar</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+const dialog = document.querySelector("#task-dialog")
+const form = document.querySelector("#task-form")
+const errors = document.querySelector("#calendar-errors")
+const token = form.querySelector('input[name="__RequestVerificationToken"]').value
+const fields = {
+    id: document.querySelector("#task-id"),
+    title: document.querySelector("#task-title"),
+    start: document.querySelector("#task-start"),
+    end: document.querySelector("#task-end"),
+    status: document.querySelector("#task-status"),
+    priority: document.querySelector("#task-priority"),
+    projectId: document.querySelector("#task-project"),
+    assignedTo: document.querySelector("#task-assigned")
+}
+
+const toInputValue = value => {
+    if (!value) return ""
+    const date = new Date(value)
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    return local.toISOString().slice(0, 16)
+}
+
+const requestBody = values => ({
+    title: values.title,
+    start: values.start,
+    end: values.end || null,
+    status: Number(values.status),
+    priority: Number(values.priority),
+    projectId: values.projectId ? Number(values.projectId) : null,
+    assignedTo: values.assignedTo || null
+})
+
+const save = async (id, body) => {
+    const response = await fetch(id ? `/api/tasks/${id}` : "/api/tasks", {
+        method: id ? "PUT" : "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": token
+        },
+        body: JSON.stringify(body)
+    })
+    if (!response.ok) {
+        const problem = await response.json().catch(() => null)
+        const messages = problem?.errors ? Object.values(problem.errors).flat() : [problem?.error || "No se pudo guardar la tarea."]
+        throw new Error(messages.join(" "))
+    }
+    return response.json()
+}
+
+const openDialog = (task, editing = Boolean(task?.id)) => {
+    errors.textContent = ""
+    fields.id.value = task?.id || ""
+    fields.title.value = task?.title || ""
+    fields.start.value = toInputValue(task?.start || new Date())
+    fields.end.value = toInputValue(task?.end)
+    fields.status.value = task?.status ?? 0
+    fields.priority.value = task?.priority ?? 1
+    fields.projectId.value = task?.projectId ?? ""
+    fields.assignedTo.value = task?.assignedTo || ""
+    document.querySelector("#dialog-title").textContent = editing ? "Editar tarea" : "Nueva tarea"
+    dialog.showModal()
+    fields.title.focus()
+}
+
+const calendar = new FullCalendar.Calendar(document.querySelector("#calendar"), {
+    locale: "es",
+    initialView: "dayGridMonth",
+    firstDay: 1,
+    selectable: true,
+    editable: true,
+    nowIndicator: true,
+    headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "dayGridMonth,timeGridWeek"
+    },
+    buttonText: {
+        today: "Hoy",
+        month: "Mes",
+        week: "Semana"
+    },
+    events: async (info, success, failure) => {
+        try {
+            const response = await fetch(`/api/tasks?start=${encodeURIComponent(info.startStr)}&end=${encodeURIComponent(info.endStr)}`)
+            if (!response.ok) throw new Error("No se pudieron cargar las tareas.")
+            const tasks = await response.json()
+            success(tasks.map(task => ({
+                id: String(task.id),
+                title: task.title,
+                start: task.start,
+                end: task.end,
+                classNames: [`calendar-priority-${task.priority}`],
+                extendedProps: task
+            })))
+        } catch (error) {
+            failure(error)
+        }
+    },
+    dateClick: info => openDialog({
+        start: info.allDay ? `${info.dateStr}T09:00:00` : info.dateStr,
+        end: info.allDay ? `${info.dateStr}T10:00:00` : new Date(info.date.getTime() + 3600000),
+        status: 0,
+        priority: 1
+    }),
+    eventClick: info => openDialog({
+        ...info.event.extendedProps,
+        id: info.event.id,
+        title: info.event.title,
+        start: info.event.start,
+        end: info.event.end
+    }),
+    eventDrop: info => updateEventDates(info),
+    eventResize: info => updateEventDates(info)
+})
+
+const updateEventDates = async info => {
+    const task = info.event.extendedProps
+    try {
+        await save(info.event.id, requestBody({
+            ...task,
+            title: info.event.title,
+            start: toInputValue(info.event.start),
+            end: toInputValue(info.event.end) || null
+        }))
+        calendar.refetchEvents()
+    } catch (error) {
+        info.revert()
+        window.alert(error.message)
+    }
+}
+
+form.addEventListener("submit", async event => {
+    event.preventDefault()
+    errors.textContent = ""
+    try {
+        await save(fields.id.value, requestBody({
+            title: fields.title.value,
+            start: fields.start.value,
+            end: fields.end.value,
+            status: fields.status.value,
+            priority: fields.priority.value,
+            projectId: fields.projectId.value,
+            assignedTo: fields.assignedTo.value
+        }))
+        dialog.close()
+        calendar.refetchEvents()
+    } catch (error) {
+        errors.textContent = error.message
+    }
+})
+
+document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => dialog.close()))
+calendar.render()
+</script>
+</body>
+</html>
