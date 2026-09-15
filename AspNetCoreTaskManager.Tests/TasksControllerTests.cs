@@ -17,7 +17,7 @@ public class TasksControllerTests
         repository.Add(new TaskItem { Title = "Preparar API", Status = WorkStatus.InProgress, Priority = TaskPriority.High });
         repository.Add(new TaskItem { Title = "Documentar", Status = WorkStatus.Pending, Priority = TaskPriority.Low });
 
-        var result = Assert.IsType<ViewResult>(new TasksController(repository).Index(WorkStatus.InProgress, TaskPriority.High, "API"));
+        var result = Assert.IsType<ViewResult>(new TasksController(repository, database).Index(WorkStatus.InProgress, TaskPriority.High, "API"));
         var model = Assert.IsAssignableFrom<IReadOnlyCollection<TaskItem>>(result.Model);
 
         Assert.Single(model);
@@ -28,7 +28,7 @@ public class TasksControllerTests
     public void Create_ValidTask_PersistsItAndRedirects()
     {
         using var database = CreateDatabase();
-        var result = new TasksController(new EfTaskRepository(database)).Create(new TaskItem { Title = "Nueva" });
+        var result = new TasksController(new EfTaskRepository(database), database).Create(new TaskItem { Title = "Nueva" });
 
         Assert.IsType<RedirectToActionResult>(result);
         Assert.Single(database.Tasks);
@@ -38,7 +38,7 @@ public class TasksControllerTests
     public void Create_InvalidTask_DoesNotPersistIt()
     {
         using var database = CreateDatabase();
-        var controller = new TasksController(new EfTaskRepository(database));
+        var controller = new TasksController(new EfTaskRepository(database), database);
         controller.ModelState.AddModelError("Title", "Obligatorio");
 
         var result = controller.Create(new TaskItem());
@@ -54,7 +54,7 @@ public class TasksControllerTests
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Detalle" });
 
-        var result = Assert.IsType<ViewResult>(new TasksController(repository).Details(task.Id));
+        var result = Assert.IsType<ViewResult>(new TasksController(repository, database).Details(task.Id));
 
         Assert.Equal(task.Id, Assert.IsType<TaskItem>(result.Model).Id);
     }
@@ -63,7 +63,7 @@ public class TasksControllerTests
     public void Details_MissingTask_ReturnsNotFound()
     {
         using var database = CreateDatabase();
-        Assert.IsType<NotFoundResult>(new TasksController(new EfTaskRepository(database)).Details(99));
+        Assert.IsType<NotFoundResult>(new TasksController(new EfTaskRepository(database), database).Details(99));
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class TasksControllerTests
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Editar" });
 
-        Assert.IsType<ViewResult>(new TasksController(repository).Edit(task.Id));
+        Assert.IsType<ViewResult>(new TasksController(repository, database).Edit(task.Id));
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class TasksControllerTests
         var task = repository.Add(new TaskItem { Title = "Original" });
         task.Title = "Actualizada";
 
-        var result = new TasksController(repository).Edit(task.Id, task);
+        var result = new TasksController(repository, database).Edit(task.Id, task);
 
         Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Actualizada", database.Tasks.AsNoTracking().Single().Title);
@@ -94,7 +94,7 @@ public class TasksControllerTests
     public void EditPost_WithDifferentIds_ReturnsBadRequest()
     {
         using var database = CreateDatabase();
-        var controller = new TasksController(new EfTaskRepository(database));
+        var controller = new TasksController(new EfTaskRepository(database), database);
         Assert.IsType<BadRequestResult>(controller.Edit(1, new TaskItem { Id = 2, Title = "Error" }));
     }
 
@@ -104,7 +104,7 @@ public class TasksControllerTests
         using var database = CreateDatabase();
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Original" });
-        var controller = new TasksController(repository);
+        var controller = new TasksController(repository, database);
         controller.ModelState.AddModelError("DueDate", "Fecha no válida");
         task.Title = "No guardar";
 
@@ -121,7 +121,7 @@ public class TasksControllerTests
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Cambiar" });
 
-        var result = new TasksController(repository).ChangeStatus(task.Id, WorkStatus.Completed);
+        var result = new TasksController(repository, database).ChangeStatus(task.Id, WorkStatus.Completed);
 
         Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(WorkStatus.Completed, database.Tasks.AsNoTracking().Single().Status);
@@ -134,7 +134,7 @@ public class TasksControllerTests
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Eliminar" });
 
-        Assert.IsType<ViewResult>(new TasksController(repository).Delete(task.Id));
+        Assert.IsType<ViewResult>(new TasksController(repository, database).Delete(task.Id));
         Assert.Single(database.Tasks);
     }
 
@@ -145,7 +145,7 @@ public class TasksControllerTests
         var repository = new EfTaskRepository(database);
         var task = repository.Add(new TaskItem { Title = "Eliminar" });
 
-        var result = new TasksController(repository).DeleteConfirmed(task.Id);
+        var result = new TasksController(repository, database).DeleteConfirmed(task.Id);
 
         Assert.IsType<RedirectToActionResult>(result);
         Assert.Empty(database.Tasks);
@@ -155,7 +155,7 @@ public class TasksControllerTests
     public void MissingTasks_ReturnNotFound()
     {
         using var database = CreateDatabase();
-        var controller = new TasksController(new EfTaskRepository(database));
+        var controller = new TasksController(new EfTaskRepository(database), database);
 
         Assert.IsType<NotFoundResult>(controller.Edit(99));
         Assert.IsType<NotFoundResult>(controller.Delete(99));

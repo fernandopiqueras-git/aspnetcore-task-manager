@@ -8,12 +8,6 @@ namespace AspNetCoreTaskManager.Controllers;
 
 public class TasksController(ITaskRepository repository, AppDbContext database) : Controller
 {
-    public TasksController(ITaskRepository repository)
-        : this(repository, (repository as EfTaskRepository)?.Database
-            ?? throw new ArgumentException("El repositorio debe usar Entity Framework Core.", nameof(repository)))
-    {
-    }
-
     [HttpGet]
     public IActionResult Index(WorkStatus? status, TaskPriority? priority, string? search)
     {
